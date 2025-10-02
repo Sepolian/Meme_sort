@@ -1,0 +1,21 @@
+build a image database from scratch, including frontend and backend which has following requirement:
+1. the database should have a frontend to allow user to interact
+2. user can upload new image, view all image in the database, search image by tag.
+3. when adding a new image, user can create tag or adding existing tag to the image
+
+
+
+
+first understand the project sturcture, then add two new feature to the project:
+1. use a database to store the image info, rather than the current json file
+2. add a ocr extension to extract the text in the uplaod image, and let user to modify this extrated text and then store this as a new info for the image
+
+
+understand the project first
+then add following new feature to the project
+1. at the upload image section of upload page , add a new button called "batch upload"  to jump to a new page
+2. this new page should hava the url path of "batch_upload"
+3. this batch upload is to allow user upload many image at one time
+4. you need to list the preview of the user added images
+5. on top of the page, there should be a area to allow user drag the avaliable tag to the image in order to add tag
+6. on top of these, it should also be a way to add a specific tag to all the queueing images

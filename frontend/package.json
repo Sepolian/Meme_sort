@@ -1,0 +1,39 @@
+{
+  "name": "image-database-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "axios": "^1.6.0",
+    "react": "^17.0.2",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "^17.0.2",
+    "react-dropzone": "^14.3.8",
+    "react-router-dom": "^6.23.1",
+    "react-scripts": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/minimatch": "^6.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "typescript": "^4.1.2"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
