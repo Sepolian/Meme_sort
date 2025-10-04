@@ -41,6 +41,14 @@ const connectDatabase = () => {
         CREATE INDEX IF NOT EXISTS idx_image_tags_image ON image_tags(image_id);
         CREATE INDEX IF NOT EXISTS idx_image_tags_tag ON image_tags(tag_id);
     `);
+    try {
+        db.exec('ALTER TABLE images ADD COLUMN vector TEXT');
+    }
+    catch (e) {
+        if (!e.message.includes('duplicate column name')) {
+            throw e;
+        }
+    }
     console.log(`SQLite database initialized at ${dbPath}`);
     return db;
 };

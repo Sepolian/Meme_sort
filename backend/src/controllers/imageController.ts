@@ -1,9 +1,26 @@
 import { Request, Response } from 'express';
 import Tesseract from 'tesseract.js';
 import Image from '../models/Image';
-import { saveImage, getImageUrl } from '../utils/fileHandler';
+import { saveImage, getImageUrl, resolveImageFilePath } from '../utils/fileHandler';
 import { DEFAULT_LLM_SYSTEM_PROMPT, getLLMConfig, updateLLMConfig } from '../config/llm';
-import { scanImageSimilarity } from '../utils/imageSimilarity';
+import { scanImageSimilarity, calculateImageVector} from '../utils/imageSimilarity';
+
+const triggerVectorCalculation = async (image: Image) => {
+    console.log(`Triggering vector calculation for image ${image.id}`);
+    const imagePath = resolveImageFilePath(image.url);
+    if (!imagePath) {
+        console.error(`Could not resolve file path for image ${image.id}`);
+        return;
+    }
+
+    const vector = await calculateImageVector(imagePath);
+    if (vector) {
+        await Image.update(image.id, { vector });
+        console.log(`Successfully calculated and saved vector for image ${image.id}`);
+    } else {
+        console.error(`Failed to calculate vector for image ${image.id}`);
+    }
+};
 
 export class ImageController {
     async uploadImage(req: Request, res: Response) {
@@ -28,6 +45,8 @@ export class ImageController {
                 tags: tagArray,
                 ocrText: typeof ocrTextRaw === 'string' ? ocrTextRaw.trim() : ''
             });
+
+            triggerVectorCalculation(newImage);
             
             res.status(201).json(newImage);
         } catch (error) {
@@ -75,6 +94,7 @@ export class ImageController {
                     ocrText: ocrText
                 });
                 createdImages.push(newImage);
+                triggerVectorCalculation(newImage);
             }
 
             res.status(201).json(createdImages);
@@ -423,9 +443,10 @@ export class ImageController {
     async scanSimilarImages(req: Request, res: Response) {
         try {
             const thresholdParam = typeof req.query.threshold === 'string' ? parseFloat(req.query.threshold) : undefined;
+            const defaultThreshold = process.env.DEFAULT_SIMILARITY_THRESHOLD ? parseFloat(process.env.DEFAULT_SIMILARITY_THRESHOLD) : 0.85;
             const threshold = Number.isFinite(thresholdParam)
                 ? Math.min(Math.max(thresholdParam as number, 0), 1)
-                : 0.92;
+                : defaultThreshold;
 
             const results = await scanImageSimilarity(threshold);
             res.status(200).json({ results, threshold });
@@ -435,6 +456,25 @@ export class ImageController {
             res.status(500).json({ message: 'Error scanning image similarity', error: errorMessage });
         }
     }
+    async generateMissingVectors(req: Request, res: Response) {
+        res.status(202).json({ message: 'Started generating missing vectors in the background.' });
+
+        (async () => {
+            try {
+                const images = await Image.findAll();
+                const imagesWithoutVectors = images.filter(image => !image.vector || image.vector.length === 0);
+                console.log(`Found ${imagesWithoutVectors.length} images without vectors. Starting generation.`);
+
+                for (const image of imagesWithoutVectors) {
+                    await triggerVectorCalculation(image);
+                }
+                console.log('Finished generating missing vectors.');
+            } catch (error) {
+                console.error('Error generating missing vectors:', error);
+            }
+        })();
+    }
+
 }
 
 const stripMarkdownFence = (payload: string): string => {

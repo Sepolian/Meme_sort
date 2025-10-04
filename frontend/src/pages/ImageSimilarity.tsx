@@ -10,13 +10,14 @@ const ImageSimilarity: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    const [showAll, setShowAll] = useState<boolean>(false);
 
-    const loadPairs = useCallback(async () => {
+    const loadPairs = useCallback(async (fetchAll: boolean) => {
         try {
             setLoading(true);
             setError(null);
             setMessage(null);
-            const results = await scanImageSimilarity();
+            const results = await scanImageSimilarity(fetchAll ? 0 : undefined);
             setPairs(results);
         } catch (err) {
             console.error('Error scanning similarity:', err);
@@ -28,8 +29,8 @@ const ImageSimilarity: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        loadPairs();
-    }, [loadPairs]);
+        loadPairs(showAll);
+    }, [loadPairs, showAll]);
 
     const handleDelete = async (imageId: string) => {
         const confirmed = window.confirm('Delete this image from the library? This action cannot be undone.');
@@ -55,6 +56,10 @@ const ImageSimilarity: React.FC = () => {
         setPairs((prev) => prev.filter((pair) => !(pair.imageA.id === imageAId && pair.imageB.id === imageBId)));
     };
 
+    const handleToggleShowAll = () => {
+        setShowAll((prev) => !prev);
+    };
+
     const content = useMemo(() => {
         if (loading) {
             return (
@@ -69,7 +74,7 @@ const ImageSimilarity: React.FC = () => {
             return (
                 <div className="message error">
                     {error}
-                    <button type="button" className="retry-button" onClick={loadPairs}>
+                    <button type="button" className="retry-button" onClick={() => loadPairs(showAll)}>
                         Try again
                     </button>
                 </div>
@@ -142,7 +147,7 @@ const ImageSimilarity: React.FC = () => {
                 ))}
             </div>
         );
-    }, [loading, error, pairs, loadPairs, processingId]);
+    }, [loading, error, pairs, processingId, showAll, loadPairs]);
 
     return (
         <div className="similarity-page">
@@ -150,17 +155,27 @@ const ImageSimilarity: React.FC = () => {
                 <div>
                     <h1 className="page-title">🔍 Image Similarity Review</h1>
                     <p className="page-subtitle">
-                        Review and resolve potential duplicate images detected above a 92% similarity match.
+                        {showAll
+                            ? 'Showing all similarity results.'
+                            : 'Review and resolve potential duplicate images detected above a 85% similarity match.'}
                     </p>
                 </div>
                 <div className="similarity-actions-bar">
                     <button
                         type="button"
                         className="refresh-tags-button"
-                        onClick={loadPairs}
+                        onClick={() => loadPairs(showAll)}
                         disabled={loading}
                     >
                         {loading ? 'Scanning…' : '🔄 Re-run Scan'}
+                    </button>
+                    <button
+                        type="button"
+                        className="refresh-tags-button"
+                        onClick={handleToggleShowAll}
+                        disabled={loading}
+                    >
+                        {showAll ? 'Show High-Similarity Only' : 'Show All Results'}
                     </button>
                     <button type="button" className="manage-tags-link" onClick={() => navigate('/gallery')}>
                         ← Back to Gallery

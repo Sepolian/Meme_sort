@@ -9,6 +9,22 @@ const Image_1 = __importDefault(require("../models/Image"));
 const fileHandler_1 = require("../utils/fileHandler");
 const llm_1 = require("../config/llm");
 const imageSimilarity_1 = require("../utils/imageSimilarity");
+const triggerVectorCalculation = async (image) => {
+    console.log(`Triggering vector calculation for image ${image.id}`);
+    const imagePath = (0, fileHandler_1.resolveImageFilePath)(image.url);
+    if (!imagePath) {
+        console.error(`Could not resolve file path for image ${image.id}`);
+        return;
+    }
+    const vector = await (0, imageSimilarity_1.calculateImageVector)(imagePath);
+    if (vector) {
+        await Image_1.default.update(image.id, { vector });
+        console.log(`Successfully calculated and saved vector for image ${image.id}`);
+    }
+    else {
+        console.error(`Failed to calculate vector for image ${image.id}`);
+    }
+};
 class ImageController {
     async uploadImage(req, res) {
         try {
@@ -29,6 +45,7 @@ class ImageController {
                 tags: tagArray,
                 ocrText: typeof ocrTextRaw === 'string' ? ocrTextRaw.trim() : ''
             });
+            triggerVectorCalculation(newImage);
             res.status(201).json(newImage);
         }
         catch (error) {
@@ -68,6 +85,7 @@ class ImageController {
                     ocrText: ocrText
                 });
                 createdImages.push(newImage);
+                triggerVectorCalculation(newImage);
             }
             res.status(201).json(createdImages);
         }
@@ -388,6 +406,23 @@ class ImageController {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             res.status(500).json({ message: 'Error scanning image similarity', error: errorMessage });
         }
+    }
+    async generateMissingVectors(req, res) {
+        res.status(202).json({ message: 'Started generating missing vectors in the background.' });
+        (async () => {
+            try {
+                const images = await Image_1.default.findAll();
+                const imagesWithoutVectors = images.filter(image => !image.vector || image.vector.length === 0);
+                console.log(`Found ${imagesWithoutVectors.length} images without vectors. Starting generation.`);
+                for (const image of imagesWithoutVectors) {
+                    await triggerVectorCalculation(image);
+                }
+                console.log('Finished generating missing vectors.');
+            }
+            catch (error) {
+                console.error('Error generating missing vectors:', error);
+            }
+        })();
     }
 }
 exports.ImageController = ImageController;

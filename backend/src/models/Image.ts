@@ -8,6 +8,7 @@ type ImageRow = {
     url: string;
     ocrText: string | null;
     createdAt: string;
+    vector: string | null;
 };
 
 type TagRow = {
@@ -20,27 +21,30 @@ class Image {
     tags: string[];
     ocrText: string;
     createdAt: Date;
+    vector: number[] | null;
 
-    constructor(data: { url: string; tags: string[]; ocrText?: string }) {
+    constructor(data: { url: string; tags: string[]; ocrText?: string; vector?: number[] | null }) {
         this.id = randomUUID();
         this.url = data.url;
         this.tags = data.tags;
         this.ocrText = data.ocrText ?? '';
         this.createdAt = new Date();
+        this.vector = data.vector ?? null;
     }
 
-    static async create(imageData: { url: string; tags: string[]; ocrText?: string }): Promise<Image> {
+    static async create(imageData: { url: string; tags: string[]; ocrText?: string, vector?: number[] | null }): Promise<Image> {
         const db = getDb();
         const image = new Image(imageData);
 
         const insertImage = db.prepare(
-            'INSERT INTO images (id, url, ocr_text, created_at) VALUES (?, ?, ?, ?)'
+            'INSERT INTO images (id, url, ocr_text, created_at, vector) VALUES (?, ?, ?, ?, ?)'
         );
         insertImage.run(
             image.id,
             image.url,
             image.ocrText,
-            image.createdAt.toISOString()
+            image.createdAt.toISOString(),
+            image.vector ? JSON.stringify(image.vector) : null
         );
 
         const uniqueTags = this.normalizeTags(image.tags);
@@ -64,7 +68,7 @@ class Image {
         const db = getDb();
         const rows = db.prepare(
             `
-            SELECT i.id, i.url, i.ocr_text AS ocrText, i.created_at AS createdAt
+            SELECT i.id, i.url, i.ocr_text AS ocrText, i.created_at AS createdAt, i.vector
             FROM images i
             INNER JOIN image_tags it ON it.image_id = i.id
             INNER JOIN tags t ON t.id = it.tag_id
@@ -81,7 +85,7 @@ class Image {
         const searchTerm = `%${query.trim()}%`;
         const rows = db.prepare(
             `
-            SELECT DISTINCT i.id, i.url, i.ocr_text AS ocrText, i.created_at AS createdAt
+            SELECT DISTINCT i.id, i.url, i.ocr_text AS ocrText, i.created_at AS createdAt, i.vector
             FROM images i
             LEFT JOIN image_tags it ON it.image_id = i.id
             LEFT JOIN tags t ON t.id = it.tag_id
@@ -97,7 +101,7 @@ class Image {
         const db = getDb();
         const rows = db.prepare(
             `
-            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt
+            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt, vector
             FROM images
             ORDER BY datetime(created_at) DESC
         `
@@ -110,7 +114,7 @@ class Image {
         const db = getDb();
         const row = db.prepare(
             `
-            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt
+            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt, vector
             FROM images
             WHERE id = ?
         `
@@ -123,11 +127,11 @@ class Image {
         return this.mapRowToImage(row);
     }
 
-    static async update(id: string, updateData: { tags?: string[]; ocrText?: string }): Promise<Image | null> {
+    static async update(id: string, updateData: { tags?: string[]; ocrText?: string, vector?: number[] | null }): Promise<Image | null> {
         const db = getDb();
         const existing = db.prepare(
             `
-            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt
+            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt, vector
             FROM images
             WHERE id = ?
         `
@@ -140,6 +144,10 @@ class Image {
         if (updateData.ocrText !== undefined) {
             const normalizedText = typeof updateData.ocrText === 'string' ? updateData.ocrText : '';
             db.prepare('UPDATE images SET ocr_text = ? WHERE id = ?').run(normalizedText, id);
+        }
+
+        if (updateData.vector !== undefined) {
+            db.prepare('UPDATE images SET vector = ? WHERE id = ?').run(updateData.vector ? JSON.stringify(updateData.vector) : null, id);
         }
 
         if (updateData.tags !== undefined) {
@@ -182,7 +190,15 @@ class Image {
 
     private static mapRowToImage(row: ImageRow): Image {
         const tags = this.getTagsForImage(row.id);
-        const image = new Image({ url: row.url, tags, ocrText: row.ocrText ?? '' });
+        let vector: number[] | null = null;
+        if (row.vector) {
+            try {
+                vector = JSON.parse(row.vector);
+            } catch (e) {
+                console.error('Failed to parse vector for image', row.id, e);
+            }
+        }
+        const image = new Image({ url: row.url, tags, ocrText: row.ocrText ?? '', vector });
         image.id = row.id;
         image.createdAt = new Date(row.createdAt);
         return image;

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import setImageRoutes from './routes/images';
 import setTagRoutes from './routes/tags';
 import { connectDatabase } from './config/database';
+import { setupPythonEnvironment } from './utils/pythonSetup';
 
 // Load environment variables
 dotenv.config();
@@ -12,21 +13,27 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Enable CORS for frontend communication
-app.use(cors());
+const startServer = async () => {
+    await setupPythonEnvironment();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+    // Enable CORS for frontend communication
+    app.use(cors());
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
 
-// Initialize storage (file-based)
-connectDatabase();
+    // Serve static files from uploads directory
+    app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-setImageRoutes(app);
-setTagRoutes(app);
+    // Initialize storage (file-based)
+    connectDatabase();
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+    setImageRoutes(app);
+    setTagRoutes(app);
+
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
+};
+
+startServer();

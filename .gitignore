@@ -5,5 +5,14 @@ backend/data/*.sqlite
 
 # Environment variables
 backend/.env
+<<<<<<< Updated upstream
 .venv/
 build/
+=======
+
+# Ignore build
+build/
+
+# Ignore python virtual environment
+backend/.venv
+>>>>>>> Stashed changes

@@ -1,38 +1,21 @@
-# Meme Sort - Image Database
+# Meme Sort – Image Database
 
-This project is an image database application that allows users to upload, view, and search images by tags. It consists of a frontend built with React and a backend built with Node.js and Express.
+An end-to-end image library that supports smart tagging, OCR enrichment, similarity detection, and rich gallery management. The project pairs a React frontend with an Express/TypeScript backend backed by SQLite and optional Python helpers for vector generation.
 
 ## Features
 
-- **Image Upload**: Users can upload images along with tags.
-- **Batch Upload**: Upload multiple images at once with metadata.
-- **Image Gallery**: Users can view all uploaded images in a gallery format.
-- **Tag Management**: Users can create new tags or select existing tags when uploading images.
-- **Search Functionality**: Users can search for images by tags or text content.
-- **Text Extraction (OCR)**: Uploaded images are processed automatically to extract text, which users can review, edit, and save with the image metadata. Supports both Tesseract OCR and LLM-based OCR.
-- **Image Similarity Detection**: Scan for duplicate or similar images using perceptual hashing, with options to delete duplicates.
-- **SQLite Storage**: Image metadata, tags, and OCR results are persisted in a local SQLite database for reliable querying.
+- **Image Upload** – Single and batch uploads with drag-and-drop, previews, and metadata.
+- **Smart Tagging** – Create, manage, and reuse tags with OCR-driven suggestions.
+- **OCR Pipeline** – Tesseract- and LLM-based extraction with editable results.
+- **Image Similarity Scan** – Vector-based duplicate detection with review tooling.
+- **Editable Metadata** – Update tags/OCR after upload.
+- **SQLite Persistence** – Lightweight relational storage with automatic migrations.
 
 ## Project Structure
 
 ```
 meme_sort/
-├── .gitattributes
-├── .gitignore
-├── package-lock.json
-├── prompt.txt
-├── README.md
 ├── backend/
-│   ├── .env
-│   ├── chi_sim.traineddata
-│   ├── chi_tra.traineddata
-│   ├── data/
-│   │   └── database.sqlite
-│   ├── dist/
-│   ├── eng.traineddata
-│   ├── node_modules/
-│   ├── package-lock.json
-│   ├── package.json
 │   ├── src/
 │   │   ├── app.ts
 │   │   ├── config/
@@ -42,81 +25,117 @@ meme_sort/
 │   │   ├── routes/
 │   │   ├── types/
 │   │   └── utils/
+│   ├── uploads/
+│   ├── data/
+│   │   └── database.sqlite
 │   ├── tsconfig.json
-│   └── uploads/
+│   └── package.json
 └── frontend/
-    ├── build/
-    │   ├── asset-manifest.json
-    │   ├── index.html
-    │   └── static/
-    ├── node_modules/
-    ├── package-lock.json
-    ├── package.json
-    ├── public/
-    │   └── index.html
     ├── src/
-    │   ├── App.css
     │   ├── App.tsx
+    │   ├── App.css
     │   ├── components/
-    │   ├── index.tsx
     │   ├── pages/
-    │   ├── react-app-env.d.ts
     │   ├── services/
     │   └── types/
-    └── tsconfig.json
+    ├── public/
+    ├── tsconfig.json
+    └── package.json
 ```
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+- Node.js 18+
+- npm (or yarn/pnpm)
+- Python 3 (for vector extraction helpers)
+- Optional: native dependencies required by [`tesseract.js`](https://github.com/naptha/tesseract.js#installation)
 
-- Node.js
-- npm or yarn
-- TypeScript
-- (Optional) [Tesseract.js dependencies](https://github.com/naptha/tesseract.js#installation) if running on systems that require native binaries.
+## Installation
 
-### Installation
+```bash
+git clone <repository-url>
+cd meme_sort
+```
 
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   cd meme_sort
-   ```
+### Frontend
 
-2. Install dependencies for the frontend:
-   ```
-   cd frontend
-   npm install
-   ```
+```bash
+cd frontend
+npm install
+```
 
-3. Install dependencies for the backend:
-   ```
-   cd backend
-   npm install
-   ```
+### Backend
 
-SQLite database files will be created automatically in `backend/data/database.sqlite` the first time the server runs.
+```bash
+cd ../backend
+npm install
+```
 
-### Running the Application
+Copy the sample environment file and adjust as needed:
 
-1. Start the backend server:
-   ```
-   cd backend
-   npm run dev
-   ```
+```bash
+cp ".env_copy" .env
+```
 
-2. Start the frontend application:
-   ```
-   cd frontend
-   npm start
-   ```
+SQLite data files are created automatically in `backend/data/database.sqlite` on first run.
 
-### Usage
+## Running the Application
 
-- Navigate to the frontend application in your browser (usually at `http://localhost:3000`).
-- Use the upload page to add new images and tags.
-- View all images in the gallery and search by tags.
+Open two terminals:
+
+```bash
+# Terminal 1 – backend
+cd backend
+npm run dev
+
+# Terminal 2 – frontend
+cd frontend
+npm start
+```
+
+- Backend defaults to `http://localhost:5000`
+- Frontend defaults to `http://localhost:3000`
+
+## Configuration
+
+### LLM OCR
+
+Edit `backend/.env` (or use the Settings page):
+
+```
+LLM_BASE_URL=https://api.example.com/v1
+LLM_MODEL=gemini-2.5-flash
+LLM_API_KEY=<your-key>
+DEFAULT_SIMILARITY_THRESHOLD=0.8
+```
+
+The frontend Settings page (`/settings`) can update these values and persists them back to `.env`.
+
+### OCR Languages
+
+Pre-bundled `eng`, `chi_sim`, and `chi_tra` trained data files live under `backend/`. Add more languages by placing additional `.traineddata` files in the same directory.
+
+### Python Vector Extraction
+
+The backend spins up a virtual environment in `backend/.venv` and installs requirements from `src/scripts/requirements.txt` on first launch automatically if Python is available. It use `facebook/dinov2-base` to generate vector. Ensure GPU drivers are configured if you expect accelerated inference (it runs fine on CPU if you have a modern CPU, say, i5-12400).
+
+## Useful Scripts
+
+| Location  | Script           | Description                                  |
+|-----------|------------------|----------------------------------------------|
+| backend   | `npm run dev`    | Start Express server with ts-node            |
+| backend   | `npm run build`  | Compile TypeScript to JavaScript             |
+| frontend  | `npm start`      | Run React dev server with fast refresh       |
+| frontend  | `npm run build`  | Produce production build                     |
+| frontend  | `npm run lint`   | Run ESLint (if configured in package.json)   |
+
+## Usage Notes
+
+- Upload images via `/upload` with optional OCR extraction and suggested tags.
+- Manage shared tag vocabulary at `/tags`.
+- Review potential duplicates in `/similarity`.
+- Edit any image’s metadata through the gallery modal or `/images/:id` edit page.
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details. Third-party components, such as the `facebook/dinov2-base` vision model, are documented in [`backend/THIRD_PARTY_NOTICES.md`](backend/THIRD_PARTY_NOTICES.md).

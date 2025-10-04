@@ -14,12 +14,13 @@ class Image {
         this.tags = data.tags;
         this.ocrText = data.ocrText ?? '';
         this.createdAt = new Date();
+        this.vector = data.vector ?? null;
     }
     static async create(imageData) {
         const db = (0, database_1.getDb)();
         const image = new Image(imageData);
-        const insertImage = db.prepare('INSERT INTO images (id, url, ocr_text, created_at) VALUES (?, ?, ?, ?)');
-        insertImage.run(image.id, image.url, image.ocrText, image.createdAt.toISOString());
+        const insertImage = db.prepare('INSERT INTO images (id, url, ocr_text, created_at, vector) VALUES (?, ?, ?, ?, ?)');
+        insertImage.run(image.id, image.url, image.ocrText, image.createdAt.toISOString(), image.vector ? JSON.stringify(image.vector) : null);
         const uniqueTags = this.normalizeTags(image.tags);
         if (uniqueTags.length > 0) {
             const insertMapping = db.prepare('INSERT OR IGNORE INTO image_tags (image_id, tag_id) VALUES (?, ?)');
@@ -34,7 +35,7 @@ class Image {
     static async findByTag(tag) {
         const db = (0, database_1.getDb)();
         const rows = db.prepare(`
-            SELECT i.id, i.url, i.ocr_text AS ocrText, i.created_at AS createdAt
+            SELECT i.id, i.url, i.ocr_text AS ocrText, i.created_at AS createdAt, i.vector
             FROM images i
             INNER JOIN image_tags it ON it.image_id = i.id
             INNER JOIN tags t ON t.id = it.tag_id
@@ -47,7 +48,7 @@ class Image {
         const db = (0, database_1.getDb)();
         const searchTerm = `%${query.trim()}%`;
         const rows = db.prepare(`
-            SELECT DISTINCT i.id, i.url, i.ocr_text AS ocrText, i.created_at AS createdAt
+            SELECT DISTINCT i.id, i.url, i.ocr_text AS ocrText, i.created_at AS createdAt, i.vector
             FROM images i
             LEFT JOIN image_tags it ON it.image_id = i.id
             LEFT JOIN tags t ON t.id = it.tag_id
@@ -59,7 +60,7 @@ class Image {
     static async findAll() {
         const db = (0, database_1.getDb)();
         const rows = db.prepare(`
-            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt
+            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt, vector
             FROM images
             ORDER BY datetime(created_at) DESC
         `).all();
@@ -68,7 +69,7 @@ class Image {
     static async findById(id) {
         const db = (0, database_1.getDb)();
         const row = db.prepare(`
-            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt
+            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt, vector
             FROM images
             WHERE id = ?
         `).get(id);
@@ -80,7 +81,7 @@ class Image {
     static async update(id, updateData) {
         const db = (0, database_1.getDb)();
         const existing = db.prepare(`
-            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt
+            SELECT id, url, ocr_text AS ocrText, created_at AS createdAt, vector
             FROM images
             WHERE id = ?
         `).get(id);
@@ -90,6 +91,9 @@ class Image {
         if (updateData.ocrText !== undefined) {
             const normalizedText = typeof updateData.ocrText === 'string' ? updateData.ocrText : '';
             db.prepare('UPDATE images SET ocr_text = ? WHERE id = ?').run(normalizedText, id);
+        }
+        if (updateData.vector !== undefined) {
+            db.prepare('UPDATE images SET vector = ? WHERE id = ?').run(updateData.vector ? JSON.stringify(updateData.vector) : null, id);
         }
         if (updateData.tags !== undefined) {
             const normalizedTags = this.normalizeTags(updateData.tags);
@@ -120,7 +124,16 @@ class Image {
     }
     static mapRowToImage(row) {
         const tags = this.getTagsForImage(row.id);
-        const image = new Image({ url: row.url, tags, ocrText: row.ocrText ?? '' });
+        let vector = null;
+        if (row.vector) {
+            try {
+                vector = JSON.parse(row.vector);
+            }
+            catch (e) {
+                console.error('Failed to parse vector for image', row.id, e);
+            }
+        }
+        const image = new Image({ url: row.url, tags, ocrText: row.ocrText ?? '', vector });
         image.id = row.id;
         image.createdAt = new Date(row.createdAt);
         return image;

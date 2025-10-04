@@ -22,6 +22,7 @@ router.get('/search', imageController.searchImages.bind(imageController));
 router.get('/llm-config', imageController.getLLMConfig.bind(imageController));
 router.post('/llm-config', imageController.updateLLMConfig.bind(imageController));
 router.get('/similarity/scan', imageController.scanSimilarImages.bind(imageController));
+router.post('/vectors/generate', imageController.generateMissingVectors.bind(imageController));
 router.get('/:id', imageController.getImageById.bind(imageController));
 router.put('/:id', imageController.updateImage.bind(imageController));
 router.delete('/:id', imageController.deleteImage.bind(imageController));
