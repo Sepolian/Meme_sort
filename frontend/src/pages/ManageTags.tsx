@@ -6,14 +6,14 @@ const ManageTags: React.FC = () => {
 	return (
 		<div className="manage-tags-page">
 			<div className="manage-tags-container">
-				<h1 className="page-title">🏷️ Manage Tags</h1>
+				<h1 className="page-title">Manage Tags</h1>
 				<p className="page-subtitle">
 					Create and review the tags available across your image library. New tags appear instantly on the
 					upload page.
 				</p>
 				<div className="manage-tags-actions">
 					<Link to="/similarity" className="similarity-scan-button">
-						🔍 Scan Image Similarity
+						Scan Image Similarity
 					</Link>
 				</div>
 				<TagManager />

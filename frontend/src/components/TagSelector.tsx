@@ -71,7 +71,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onChange }) => 
 		<div className="tag-selector">
 			<div className="tag-selector-header">
 				<div>
-					<h3>🏷️ Choose Tags</h3>
+					<h3>Choose Tags</h3>
 					<p className="tag-selector-helper">
 						Select existing tags for this upload. Need something new? Manage your tags separately.
 					</p>
@@ -83,10 +83,10 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onChange }) => 
 						onClick={loadTags}
 						disabled={loading}
 					>
-						{loading ? 'Refreshing…' : '🔄 Refresh'}
+						{loading ? 'Refreshing…' : 'Refresh'}
 					</button>
 					<Link to="/tags" className="manage-tags-link">
-						✏️ Manage Tags
+						Manage Tags
 					</Link>
 				</div>
 			</div>
@@ -107,7 +107,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onChange }) => 
 							onClick={() => handleRemoveTag(tag)}
 							title="Click to remove tag"
 						>
-							🏷️ {tag} <span>✕</span>
+							{tag} <span>✕</span>
 						</button>
 					))}
 				</div>

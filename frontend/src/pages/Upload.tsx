@@ -48,7 +48,7 @@ const Upload: React.FC = () => {
     return (
         <div className="upload-container">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h1 className="page-title">⬆️ Upload Image</h1>
+                <h1 className="page-title">Upload Image</h1>
                 <Link to="/batch_upload" className="batch-upload-button">Batch Upload</Link>
             </div>
             <p style={{ color: '#666', marginBottom: '2rem', textAlign: 'center' }}>
@@ -57,7 +57,7 @@ const Upload: React.FC = () => {
             <TagSelector selectedTags={tags} onChange={handleTagsChange} />
             {suggestedTags.length > 0 && (
                 <div className="suggested-tags-section">
-                    <h4>💡 Suggested Tags:</h4>
+                    <h4>Suggested Tags:</h4>
                     <div className="tags-display">
                         {suggestedTags.map((tag) => {
                             const alreadySelected = tags.some(
@@ -71,7 +71,7 @@ const Upload: React.FC = () => {
                                     onClick={() => handleAddTag(tag)}
                                     disabled={alreadySelected}
                                 >
-                                    {alreadySelected ? '✅ Added' : '➕ Add'} {tag}
+                                    {alreadySelected ? 'Added' : 'Add'} {tag}
                                 </button>
                             );
                         })}

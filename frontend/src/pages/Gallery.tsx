@@ -149,7 +149,7 @@ const Gallery: React.FC = () => {
     <div className="gallery-container">
       <div className="gallery-header">
         <div className="gallery-header-top">
-          <h1 className="page-title">🖼️ Image Library</h1>
+          <h1 className="page-title">Image Library</h1>
           <div className="gallery-actions">
             <button
               type="button"
@@ -157,14 +157,14 @@ const Gallery: React.FC = () => {
               onClick={handleRefresh}
               disabled={loading || refreshing}
             >
-              {refreshing || loading ? 'Refreshing…' : '🔄 Refresh'}
+              {refreshing || loading ? 'Refreshing…' : 'Refresh'}
             </button>
             <button
               type="button"
               className="refresh-tags-button"
               onClick={() => navigate('/similarity')}
             >
-              🔍 Scan Duplicates
+              Scan Duplicates
             </button>
           </div>
         </div>

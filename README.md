@@ -45,7 +45,7 @@ meme_sort/
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 20
 - npm (or yarn/pnpm)
 - Python 3 (for vector extraction helpers)
 - Optional: native dependencies required by [`tesseract.js`](https://github.com/naptha/tesseract.js#installation)

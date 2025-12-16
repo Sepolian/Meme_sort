@@ -8,6 +8,7 @@ backend/.env
 
 # Ignore build
 build/
+dist/
 
 # Ignore python virtual environment
 backend/.venv

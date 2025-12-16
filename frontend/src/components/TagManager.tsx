@@ -92,7 +92,7 @@ const TagManager: React.FC = () => {
                     className="add-tag-button"
                     disabled={saving || !normalize(newTag)}
                 >
-                    {saving ? 'Saving...' : '➕ Add Tag'}
+                    {saving ? 'Saving...' : 'Add Tag'}
                 </button>
                 <button
                     type="button"
@@ -100,7 +100,7 @@ const TagManager: React.FC = () => {
                     onClick={loadTags}
                     disabled={loading || saving}
                 >
-                    {loading ? 'Refreshing...' : '🔄 Refresh'}
+                    {loading ? 'Refreshing...' : 'Refresh'}
                 </button>
             </form>
 

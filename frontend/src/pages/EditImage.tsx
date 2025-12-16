@@ -130,7 +130,7 @@ const EditImage: React.FC = () => {
     if (error && !image) {
         return (
             <div className="gallery-error">
-                <div className="error-icon">❌</div>
+                <div className="error-icon"></div>
                 <p>{error}</p>
                 <Link to="/gallery" className="manage-tags-link">
                     ← Back to Gallery
@@ -142,7 +142,6 @@ const EditImage: React.FC = () => {
     if (!image) {
         return (
             <div className="gallery-empty">
-                <div className="empty-icon">📷</div>
                 <h3>Image not found</h3>
                 <Link to="/gallery" className="manage-tags-link">
                     ← Back to Gallery
@@ -160,7 +159,7 @@ const EditImage: React.FC = () => {
             </div>
             <div className="edit-image-card">
                 <div className="edit-image-header">
-                    <h1 className="page-title">✏️ Edit Image</h1>
+                    <h1 className="page-title">Edit Image</h1>
                     <p className="page-subtitle">
                         Update tags or OCR text for this image.
                     </p>
@@ -200,7 +199,7 @@ const EditImage: React.FC = () => {
                                                 className="selected-tag"
                                                 onClick={() => handleRemoveTag(tag)}
                                             >
-                                                🏷️ {tag} <span>✕</span>
+                                                {tag} <span>✕</span>
                                             </button>
                                         ))}
                                     </div>
@@ -228,7 +227,7 @@ const EditImage: React.FC = () => {
                                     className="form-input"
                                 />
                                 <button type="button" className="add-tag-button" onClick={handleAddTag}>
-                                    ➕ Add
+                                    Add
                                 </button>
                             </div>
                             {availableTags.length > 0 && (
@@ -260,7 +259,7 @@ const EditImage: React.FC = () => {
 
                         <div className="form-actions">
                             <button type="submit" className="save-button" disabled={saving}>
-                                {saving ? 'Saving…' : '💾 Save Changes'}
+                                {saving ? 'Saving…' : 'Save Changes'}
                             </button>
                         </div>
                     </form>

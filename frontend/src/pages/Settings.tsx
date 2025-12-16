@@ -45,17 +45,17 @@ const Settings: React.FC = () => {
                 model: config.model,
                 systemPrompt: config.systemPrompt
             };
-            
+
             if (config.apiKey) {
                 updateData.apiKey = config.apiKey;
             }
 
             await updateLLMConfig(updateData);
             setMessage({ type: 'success', text: 'Configuration saved successfully!' });
-            
+
             // Reload config to get updated hasApiKey status
             await loadConfig();
-            
+
             // Clear API key field for security
             setConfig(prev => ({ ...prev, apiKey: '' }));
         } catch (error) {
@@ -85,15 +85,15 @@ const Settings: React.FC = () => {
     return (
         <div className="settings-page">
             <div className="settings-container">
-                <h2>⚙️ Settings</h2>
-                
+                <h2>Settings</h2>
+
                 <form onSubmit={handleSave} className="settings-form">
                     <div className="settings-section">
-                        <h3>🤖 LLM Configuration</h3>
+                        <h3>LLM Configuration</h3>
                         <p className="section-description">
                             Configure your LLM provider for advanced OCR functionality
                         </p>
-                        
+
                         <div className="form-group">
                             <label htmlFor="baseUrl">Base URL</label>
                             <input
@@ -127,7 +127,7 @@ const Settings: React.FC = () => {
                         <div className="form-group">
                             <label htmlFor="apiKey">
                                 API Key
-                                {config.hasApiKey && <span className="api-key-status">✅ Set</span>}
+                                {config.hasApiKey && <span className="api-key-status">Set</span>}
                             </label>
                             <input
                                 id="apiKey"
@@ -138,7 +138,7 @@ const Settings: React.FC = () => {
                                 className="form-input"
                             />
                             <small className="input-help">
-                                {config.hasApiKey 
+                                {config.hasApiKey
                                     ? "Leave empty to keep current key, or enter a new one to replace it"
                                     : "Your API key for accessing the LLM service"
                                 }
@@ -173,7 +173,7 @@ const Settings: React.FC = () => {
                             disabled={saving}
                             className="save-button"
                         >
-                            {saving ? '💾 Saving...' : '💾 Save Configuration'}
+                            {saving ? 'Saving...' : 'Save Configuration'}
                         </button>
                     </div>
                 </form>

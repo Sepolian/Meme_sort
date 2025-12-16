@@ -25,7 +25,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ tags, onSuggestedTagsChange }
             if (method === 'tesseract') {
                 onSuggestedTagsChange([]);
             }
-            
+
             let response;
             if (method === 'llm') {
                 response = await extractOcrTextLLM(file);
@@ -40,7 +40,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ tags, onSuggestedTagsChange }
                 response = await extractOcrText(file, language);
                 onSuggestedTagsChange([]);
             }
-            
+
             setOcrText(response.text ?? '');
         } catch (error) {
             console.error('Error extracting text:', error);
@@ -58,7 +58,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ tags, onSuggestedTagsChange }
         setOcrText('');
         setOcrError(null);
         onSuggestedTagsChange([]);
-        
+
         // Create preview
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -90,7 +90,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ tags, onSuggestedTagsChange }
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setDragOver(false);
-        
+
         const files = e.dataTransfer.files;
         if (files && files[0]) {
             handleFileChange(files[0]);
@@ -165,37 +165,43 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ tags, onSuggestedTagsChange }
 
     return (
         <div className="image-upload">
-            <h2>📷 Upload Image</h2>
-            
+            <h2>Upload Image</h2>
+
             <div className="file-input-section">
-                <input 
+                <input
                     ref={fileInputRef}
                     id="file-input"
-                    type="file" 
+                    type="file"
                     onChange={handleInputChange}
                     accept="image/*"
                     className="file-input"
                 />
-                <label 
+                <label
                     htmlFor="file-input"
                     className={`file-input-label ${dragOver ? 'drag-over' : ''}`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                 >
-                    {selectedFile ? 
-                        `📁 Selected: ${selectedFile.name}` : 
-                        '📤 Choose Image or Drag & Drop'
+                    {selectedFile ?
+                        `Selected: ${selectedFile.name}` :
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                            <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-400">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <span>Click to upload or drag and drop</span>
+                            <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>SVG, PNG, JPG (max. 10MB)</span>
+                        </div>
                     }
                 </label>
             </div>
 
             {preview && (
                 <div className="preview-section">
-                    <h4>📷 Preview:</h4>
-                    <img 
-                        src={preview} 
-                        alt="Preview" 
+                    <h4>Preview:</h4>
+                    <img
+                        src={preview}
+                        alt="Preview"
                         className="preview-image"
                     />
                 </div>
@@ -203,7 +209,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ tags, onSuggestedTagsChange }
 
             <div className="ocr-section">
                 <div className="ocr-header">
-                    <h4>📝 OCR Text</h4>
+                    <h4>OCR Text</h4>
                     <div className="ocr-controls">
                         <div className="ocr-method-picker">
                             <label htmlFor="ocr-method">Method:</label>
@@ -240,7 +246,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ tags, onSuggestedTagsChange }
                             onClick={handleReextract}
                             disabled={!selectedFile || ocrLoading}
                         >
-                            {ocrLoading ? '⏳ Extracting...' : '🔁 Re-run OCR'}
+                            {ocrLoading ? 'Extracting...' : 'Re-run OCR'}
                         </button>
                     </div>
                 </div>
@@ -264,12 +270,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ tags, onSuggestedTagsChange }
             </div>
 
             <div className="selected-tags-section">
-                <h4>🏷️ Selected Tags:</h4>
+                <h4>Selected Tags:</h4>
                 <div className="tags-display">
                     {tags.length > 0 ? (
                         tags.map((tag, index) => (
                             <span key={index} className="selected-tag">
-                                🏷️ {tag}
+                                {tag}
                             </span>
                         ))
                     ) : (
@@ -280,12 +286,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ tags, onSuggestedTagsChange }
                 </div>
             </div>
 
-            <button 
+            <button
                 onClick={handleUpload}
                 disabled={!selectedFile || uploading || ocrLoading}
                 className="upload-button"
             >
-                {uploading ? '⏳ Uploading...' : '🚀 Upload Image'}
+                {uploading ? 'Uploading...' : 'Upload Image'}
             </button>
         </div>
     );
